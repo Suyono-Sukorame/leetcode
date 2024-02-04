@@ -1,19 +1,16 @@
 # Write your MySQL query statement below
-SELECT 
-    (SELECT name FROM Users WHERE user_id = (
-        SELECT user_id 
-        FROM MovieRating
-        GROUP BY user_id
-        ORDER BY COUNT(DISTINCT movie_id) DESC, user_id ASC
-        LIMIT 1
-    )) AS results
-UNION
-SELECT 
-    (SELECT title FROM Movies WHERE movie_id = (
-        SELECT movie_id 
-        FROM MovieRating
-        WHERE YEAR(created_at) = 2020 AND MONTH(created_at) = 02
-        GROUP BY movie_id
-        ORDER BY AVG(rating) DESC, movie_id ASC
-        LIMIT 1
-    )) AS results;
+# Write your MySQL query statement below
+(SELECT name AS results
+FROM MovieRating JOIN Users USING(user_id)
+GROUP BY name
+ORDER BY COUNT(*) DESC, name
+LIMIT 1)
+
+UNION ALL
+
+(SELECT title AS results
+FROM MovieRating JOIN Movies USING(movie_id)
+WHERE EXTRACT(YEAR_MONTH FROM created_at) = 202002
+GROUP BY title
+ORDER BY AVG(rating) DESC, title
+LIMIT 1);
