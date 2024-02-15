@@ -12,21 +12,21 @@
  * }
  */
 class Solution {
-
-    private $maxFreq;
-    private $currentFreq;
-    private $modes;
-    private $prevVal;
+    
+    private $currentVal = null;
+    private $currentCount = 0;
+    private $maxCount = 0;
+    private $modes = [];
 
     /**
      * @param TreeNode $root
      * @return Integer[]
      */
     function findMode($root) {
-        $this->maxFreq = 0;
-        $this->currentFreq = 0;
+        $this->currentVal = null;
+        $this->currentCount = 0;
+        $this->maxCount = 0;
         $this->modes = [];
-        $this->prevVal = null;
 
         $this->inOrderTraversal($root);
 
@@ -38,20 +38,14 @@ class Solution {
 
         $this->inOrderTraversal($node->left);
 
-        if ($this->prevVal != null && $this->prevVal == $node->val) {
-            $this->currentFreq++;
-        } else {
-            $this->currentFreq = 1;
-        }
-
-        if ($this->currentFreq > $this->maxFreq) {
-            $this->maxFreq = $this->currentFreq;
-            $this->modes = [$node->val];
-        } elseif ($this->currentFreq == $this->maxFreq) {
+        $this->currentCount = ($node->val === $this->currentVal) ? $this->currentCount + 1 : 1;
+        if ($this->currentCount === $this->maxCount) {
             $this->modes[] = $node->val;
+        } elseif ($this->currentCount > $this->maxCount) {
+            $this->maxCount = $this->currentCount;
+            $this->modes = [$node->val];
         }
-
-        $this->prevVal = $node->val;
+        $this->currentVal = $node->val;
 
         $this->inOrderTraversal($node->right);
     }
