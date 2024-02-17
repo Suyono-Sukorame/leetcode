@@ -1,52 +1,28 @@
 class Solution {
     /**
-     * @param String $s
-     * @return String
+     * @param Integer[] $nums
+     * @return Integer
      */
-    function lastNonEmptyString($s) {
-        $charIndexesMap = [];
+    function maxSelectedElements($nums) {
+        sort($nums);
         
-        for ($i = 0; $i < strlen($s); $i++) {
-            $char = $s[$i];
-            if (!isset($charIndexesMap[$char])) {
-                $charIndexesMap[$char] = [];
+        $dp1 = array_fill(0, count($nums), 1);
+        $dp2 = array_fill(0, count($nums), 1);
+        
+        $max = 1;
+        
+        for ($i = 1; $i < count($nums); $i++) {
+            if ($nums[$i - 1] + 1 === $nums[$i]) {
+                $dp1[$i] = $dp1[$i - 1] + 1;
+                $dp2[$i] = $dp2[$i - 1] + 1;
+            } elseif ($nums[$i] === $nums[$i - 1]) {
+                $dp2[$i] = max($dp1[$i - 1] + 1, $dp2[$i - 1]);
+            } elseif ($nums[$i - 1] + 2 === $nums[$i]) {
+                $dp1[$i] = $dp2[$i - 1] + 1;
             }
-            array_push($charIndexesMap[$char], $i);
+            $max = max($max, $dp1[$i], $dp2[$i]);
         }
         
-        $max = 0;
-        $maxChars = [];
-        
-        foreach ($charIndexesMap as $char => $indexes) {
-            $length = count($indexes);
-            if ($length > $max) {
-                $max = $length;
-                $maxChars = [$char];
-            } elseif ($length === $max) {
-                $maxChars[] = $char;
-            }
-        }
-        
-        $lastRemovedChars = [];
-        
-        foreach ($maxChars as $char) {
-            $indexes = $charIndexesMap[$char];
-            $lastIndex = end($indexes);
-            $lastRemovedChars[] = [
-                'char' => $char,
-                'index' => $lastIndex
-            ];
-        }
-        
-        usort($lastRemovedChars, function($a, $b) {
-            return $a['index'] - $b['index'];
-        });
-        
-        $result = '';
-        foreach ($lastRemovedChars as $item) {
-            $result .= $item['char'];
-        }
-        
-        return $result;
+        return $max;
     }
 }
