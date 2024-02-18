@@ -9,25 +9,12 @@ class Solution {
  */
 function validSquare($p1, $p2, $p3, $p4) {
     $points = [$p1, $p2, $p3, $p4];
-    $distances = [];
-    
-    for ($i = 0; $i < 4; $i++) {
-        for ($j = $i + 1; $j < 4; $j++) {
-            $distance = $this->calculateDistance($points[$i], $points[$j]);
-            if ($distance == 0) return false;
-            $distances[] = $distance;
-        }
-    }
-    
-    sort($distances);
-    
-    return $distances[0] == $distances[1] && 
-           $distances[1] == $distances[2] &&
-           $distances[2] == $distances[3] &&
-           $distances[4] == $distances[5]; 
-}
+    $len = [];
 
-function calculateDistance($p1, $p2) {
-    return pow($p2[0] - $p1[0], 2) + pow($p2[1] - $p1[1], 2);
+    for ($i = 0; $i < count($points) - 1; $i++)
+        for ($j = $i + 1; $j < count($points); $j++)
+            $len[] = sqrt(pow($points[$i][0] - $points[$j][0], 2) + pow($points[$i][1] - $points[$j][1], 2));
+
+    return count(array_unique($len)) == 2 && array_search(0, $len) === false;
 }
 }
