@@ -1,26 +1,29 @@
 class Solution {
-    /**
-     * @param String $s
-     * @return Integer
-     */
     function uniqueLetterString($s) {
-        $mod = 10**9 + 7;
-        $lastIndex = array_fill(-1, 26, -1);
-        $prevIndex = array_fill(-1, 26, -1);
-        $result = 0;
-        $n = strlen($s);
+        $ch = str_split($s);
+        $n = count($ch);
+        if ($n == 0) return 0;
+        $prev = array_fill(0, 26, -1);
+        $dp = array_fill(0, $n, array_fill(0, 3, 0));
+        $ans = 1;
+        $prev[ord($ch[0]) - ord('A')] = 0;
+        $dp[0][0] = 1;
+        $dp[0][1] = 0;
+        $dp[0][2] = 1;
         
-        for ($i = 0; $i < $n; $i++) {
-            $index = ord($s[$i]) - ord('A');
-            $result = ($result + ($i - $lastIndex[$index]) * ($lastIndex[$index] - $prevIndex[$index])) % $mod;
-            $prevIndex[$index] = $lastIndex[$index];
-            $lastIndex[$index] = $i;
+        for ($i = 1; $i < $n; ++$i) {
+            if ($prev[ord($ch[$i]) - ord('A')] == -1) {
+                $dp[$i][0] = $i + 1;
+                $dp[$i][2] = ($i + 1) + $dp[$i - 1][2];
+            } else {
+                $dp[$i][0] = $i - $prev[ord($ch[$i]) - ord('A')];
+                $dp[$i][1] = $dp[$prev[ord($ch[$i]) - ord('A')]][0] + $dp[$prev[ord($ch[$i]) - ord('A')]][1];
+                $dp[$i][2] = $dp[$i - 1][2] + $i + 1 - 2 * $dp[$prev[ord($ch[$i]) - ord('A')]][0] - $dp[$prev[ord($ch[$i]) - ord('A')]][1];
+            }
+            $prev[ord($ch[$i]) - ord('A')] = $i;
+            $ans += $dp[$i][2];
         }
         
-        for ($i = 0; $i < 26; $i++) {
-            $result = ($result + ($n - $lastIndex[$i]) * ($lastIndex[$i] - $prevIndex[$i])) % $mod;
-        }
-        
-        return $result;
+        return $ans;
     }
 }
