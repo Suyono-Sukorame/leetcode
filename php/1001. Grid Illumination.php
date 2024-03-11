@@ -1,42 +1,73 @@
 class Solution {
 
-function gridIllumination($n, $lamps, $queries) {
-    $row = array_fill(0, $n, 0);
-    $col = array_fill(0, $n, 0);
-    $diag1 = array_fill(0, 2 * $n - 1, 0);
-    $diag2 = array_fill(0, 2 * $n - 1, 0);
-    
-    $lampSet = [];
-    foreach ($lamps as $lamp) {
-        list($r, $c) = $lamp;
-        $row[$r]++;
-        $col[$c]++;
-        $diag1[$r + $c]++;
-        $diag2[$r - $c + $n - 1]++;
-        $lampSet["$r,$c"] = true;
-    }
-    
-    $result = [];
-    foreach ($queries as $query) {
-        list($r, $c) = $query;
-        if ($row[$r] > 0 || $col[$c] > 0 || $diag1[$r + $c] > 0 || $diag2[$r - $c + $n - 1] > 0) {
-            $result[] = 1;
-            for ($i = $r - 1; $i <= $r + 1; $i++) {
-                for ($j = $c - 1; $j <= $c + 1; $j++) {
-                    if ($i >= 0 && $i < $n && $j >= 0 && $j < $n && isset($lampSet["$i,$j"])) {
-                        unset($lampSet["$i,$j"]);
-                        $row[$i]--;
-                        $col[$j]--;
-                        $diag1[$i + $j]--;
-                        $diag2[$i - $j + $n - 1]--;
-                    }
+private $n;
+private $rowIllum;
+private $colIllum;
+private $dia1Illum;
+private $dia2Illum;
+private $lamps;
+
+function isIlluminated($x, $y) {
+    return isset($this->rowIllum[$x]) && $this->rowIllum[$x] > 0 || 
+        isset($this->colIllum[$y]) && $this->colIllum[$y] > 0 || 
+        isset($this->dia1Illum[$x - $y]) && $this->dia1Illum[$x - $y] > 0 || 
+        isset($this->dia2Illum[$x + $y]) && $this->dia2Illum[$x + $y] > 0;
+}
+
+function turnOff($x, $y) {
+    for ($i = max($x - 1, 0); $i < min($x + 2, $this->n); $i++) {
+        if (isset($this->lamps[$i])) {
+            $l = &$this->lamps[$i];
+            for ($j = max($y - 1, 0); $j < min($y + 2, $this->n); $j++) {
+                if (in_array($j, $l)) {
+                    $this->rowIllum[$i]--;
+                    $this->colIllum[$j]--;
+                    $this->dia1Illum[$i - $j]--;
+                    $this->dia2Illum[$i + $j]--;
+                    unset($l[array_search($j, $l)]);
+                }
+                if (empty($l)) {
+                    unset($this->lamps[$i]);
                 }
             }
-        } else {
-            $result[] = 0;
         }
     }
-    
-    return $result;
+}
+
+function turnOn($x, $y) {
+    if (!isset($this->lamps[$x]) || !in_array($y, $this->lamps[$x])) {
+        $this->lamps[$x][] = $y;
+        $this->rowIllum[$x] = isset($this->rowIllum[$x]) ? $this->rowIllum[$x] + 1 : 1;
+        $this->colIllum[$y] = isset($this->colIllum[$y]) ? $this->colIllum[$y] + 1 : 1;
+        $this->dia1Illum[$x - $y] = isset($this->dia1Illum[$x - $y]) ? $this->dia1Illum[$x - $y] + 1 : 1;
+        $this->dia2Illum[$x + $y] = isset($this->dia2Illum[$x + $y]) ? $this->dia2Illum[$x + $y] + 1 : 1;
+    }
+}
+
+function gridIllumination($n, $lamps, $queries) {
+    $this->n = $n;
+    $this->rowIllum = [];
+    $this->colIllum = [];
+    $this->dia1Illum = [];
+    $this->dia2Illum = [];
+    $this->lamps = [];
+
+    foreach ($lamps as $lamp) {
+        $this->turnOn($lamp[0], $lamp[1]);
+    }
+
+    $ans = [];
+    foreach ($queries as $q) {
+        $x = $q[0];
+        $y = $q[1];
+        if ($this->isIlluminated($x, $y)) {
+            $ans[] = 1;
+            $this->turnOff($x, $y);
+        } else {
+            $ans[] = 0;
+        }
+    }
+
+    return $ans;
 }
 }
