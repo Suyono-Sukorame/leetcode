@@ -24,7 +24,7 @@ class Solution {
         
         usort($points, function($a, $b) {
             return $a[0] + $a[1] <=> $b[0] + $b[1];
-        });
+        });e
         $poss[] = $get(array_slice($points, 1));
         $poss[] = $get(array_slice($points, 0, -1));
 
